@@ -59,33 +59,6 @@ GROUP BY state;
 
 
 
-
-
-
--- Question 3: AQI improve on weekends vs weekdays in metro cities (last 1 year from max date)
-WITH MetroAQI AS (
-    SELECT 
-        area,
-        CASE WHEN DAYOFWEEK(date) IN (1, 7) THEN 'Weekend' ELSE 'Weekday' END AS day_type,
-        aqi_value
-    FROM aqi
-    WHERE date BETWEEN (SELECT MAX(date) - INTERVAL 1 YEAR FROM aqi) AND (SELECT MAX(date) FROM aqi)
-        AND area IN ('Delhi', 'Mumbai', 'Chennai', 'Kolkata', 'Bengaluru', 'Hyderabad', 'Ahmedabad', 'Pune')
-        AND aqi_value IS NOT NULL
-)
-SELECT 
-    area,
-    ROUND(AVG(CASE WHEN day_type = 'Weekday' THEN aqi_value END), 2) AS weekday_avg_aqi,
-    ROUND(AVG(CASE WHEN day_type = 'Weekend' THEN aqi_value END), 2) AS weekend_avg_aqi,
-    ROUND(((AVG(CASE WHEN day_type = 'Weekday' THEN aqi_value END) - 
-            AVG(CASE WHEN day_type = 'Weekend' THEN aqi_value END)) /
-           AVG(CASE WHEN day_type = 'Weekday' THEN aqi_value END) * 100), 2) AS improvement_pct
-FROM MetroAQI
-GROUP BY area;
-
-
-
-
 -- Question 3: AQI improve on weekends vs weekdays in metro cities (last 1 year from max date)
 WITH MetroAQI AS (
     SELECT 
@@ -233,65 +206,6 @@ LIMIT 10;
 6. Identified cities with persistent high number of unhealthy days to detect severely polluted regions.
 7. Used results to map pollution severity across Indian cities for prioritization.
 */
-
-
-
-
--- Question 7: Health Impact Correlation - correlate AQI spikes with health events
-WITH HealthMonthly AS (
-    SELECT 
-        state,
-        YEAR(outbreak_starting_date) AS year,
-        MONTH(outbreak_starting_date) AS month,
-        SUM(cases) AS health_events
-    FROM idsp
-    WHERE disease_illness_name IN ('Chickenpox', 'Fever with Rash', 'Measles', 'Acute Diarrheal Disease')
-    GROUP BY state, YEAR(outbreak_starting_date), MONTH(outbreak_starting_date)
-),
-AQIMonthly AS (
-    SELECT 
-        state,
-        YEAR(date) AS year,
-        MONTH(date) AS month,
-        AVG(aqi_value) AS avg_aqi,
-        SUM(CASE WHEN aqi_value > 200 THEN 1 ELSE 0 END) AS spikes
-    FROM aqi
-    WHERE aqi_value IS NOT NULL
-    GROUP BY state, YEAR(date), MONTH(date)
-),
-Merged AS (
-    SELECT 
-        h.state,
-        h.year,
-        h.month,
-        h.health_events,
-        a.avg_aqi
-    FROM HealthMonthly h
-    JOIN AQIMonthly a ON h.state = a.state AND h.year = a.year AND h.month = a.month
-),
-StateStats AS (
-    SELECT 
-        state,
-        COUNT(*) AS n,
-        AVG(health_events) AS avg_health,
-        AVG(avg_aqi) AS avg_aqi,
-        STDDEV(health_events) AS std_health,
-        STDDEV(avg_aqi) AS std_aqi,
-        SUM((health_events - AVG(health_events)) * (avg_aqi - AVG(avg_aqi))) / (COUNT(*) - 1) AS cov
-    FROM Merged
-    GROUP BY state
-    HAVING n >= 2 AND std_health > 0 AND std_aqi > 0
-)
-SELECT 
-    'Overall' AS scope,
-    (SUM(cov) / SUM(std_health * std_aqi)) AS correlation
-FROM StateStats
-UNION ALL
-SELECT 
-    state AS scope,
-    cov / (std_health * std_aqi) AS correlation
-FROM StateStats
-WHERE cov IS NOT NULL;
 
 
 
