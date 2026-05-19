@@ -21,7 +21,7 @@ The goal is to understand pollution patterns, health risks, and market demand fo
 
 | Dataset | Description |
 |----------|-------------|
-| [AQI Dataset](https://drive.google.com/file/d/1TfHuciHFajXzTb9IYo1teFz6LJlTv3C1/view?usp=drive_link | Air Quality Index data |
+| [AQI Dataset](https://drive.google.com/file/d/1TfHuciHFajXzTb9IYo1teFz6LJlTv3C1/view?usp=drive_link) | Air Quality Index data |
 | [IDSP Dataset](https://drive.google.com/file/d/1IWGGoheWQcG9N8HQ9AMN96vrJh4OKb4A/view?usp=drive_link) | Health outbreak and disease cases |
 | [Vahan Dataset](https://drive.google.com/file/d/1oYWFH4EbKiNHfTWY391tg2f7GqO11iix/view?usp=drive_link) | Vehicle registration data |
 | [Population Projection Dataset](https://drive.google.com/file/d/19XjYPaQcG3GlTeNQqgjqHARBDSYZb1df/view?usp=drive_link) | State-wise population data |
